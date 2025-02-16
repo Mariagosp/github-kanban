@@ -1,4 +1,4 @@
-import { Col, Card } from 'react-bootstrap';
+import { Col } from 'react-bootstrap';
 import { IssueType } from '../../types/IssueType';
 import { IssueCard } from '../Card/Card';
 import { useDroppable } from '@dnd-kit/core';
