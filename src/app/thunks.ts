@@ -9,7 +9,7 @@ export const fetchRepoInfo = createAsyncThunk(
         `https://api.github.com/repos/${repoPath}`,
         {
           headers: {
-            Authorization: `Bearer ${import.meta.env.VITE_GITHUB_TOKEN}`,
+            Authorization: `${import.meta.env.VITE_GITHUB_TOKEN}`,
           },
         },
       );
@@ -41,7 +41,7 @@ export const fetchIssues = createAsyncThunk(
         `https://api.github.com/repos/${repoPath}/issues?state=all`,
         {
           headers: {
-            Authorization: `Bearer ${import.meta.env.VITE_GITHUB_TOKEN}`,
+            Authorization: `${import.meta.env.VITE_GITHUB_TOKEN}`,
           },
         },
       );
