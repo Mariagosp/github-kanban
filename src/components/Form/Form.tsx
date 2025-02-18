@@ -16,7 +16,6 @@ type RepoUrl = {
 export const FormELement = () => {
   const dispatch = useAppDispatch();
 
-  const repoUrl = useAppSelector((store) => store.repo.repoUrl);
   const issues = useAppSelector((store) => store.issues.issues);
 
   const schema = yup.object().shape({

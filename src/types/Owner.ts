@@ -1,5 +1,5 @@
 export type RepoInfo = {
-  id?: number;
+  id?: number | null;
   name?: string;
   url?: string;
   urlRepo?: string;
