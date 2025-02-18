@@ -1,5 +1,6 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { StateType } from '../types/StateType';
+import { Issue } from '../utils/TypeforGithubData';
 
 export const fetchRepoInfo = createAsyncThunk(
   'repo/fetchRepoInfo',
@@ -28,8 +29,12 @@ export const fetchRepoInfo = createAsyncThunk(
         repoName: data.name,
         stars: data.stargazers_count,
       };
-    } catch (error: any) {
-      return rejectWithValue(error.message);
+    } catch (error) {
+      if (error instanceof Error) {
+        return rejectWithValue(error.message);
+      } else {
+        return rejectWithValue('Something went wrong!');
+      }
     }
   },
 );
@@ -50,11 +55,11 @@ export const fetchIssues = createAsyncThunk(
         throw new Error('Issues Error');
       }
 
-      const data = await responseData.json();
+      const data: Issue[] = await responseData.json();
 
       const formattedIssues = data
-        .filter((issue: any) => !issue.pull_request)
-        .map((issue: any) => ({
+        .filter((issue) => !issue.pull_request)
+        .map((issue) => ({
           id: issue.id,
           title: issue.title,
           author: issue.user.login,
@@ -70,8 +75,12 @@ export const fetchIssues = createAsyncThunk(
         repoPath,
         issues: formattedIssues,
       };
-    } catch (error: any) {
-      return rejectWithValue(error.message);
+    } catch (error) {
+      if (error instanceof Error) {
+        return rejectWithValue(error.message);
+      } else {
+        return rejectWithValue('Something went wrong!');
+      }
     }
   },
 );
