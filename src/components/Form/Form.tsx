@@ -33,7 +33,7 @@ export const FormELement = () => {
   } = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
-      repoUrl,
+      repoUrl: '',
     },
   });
 
