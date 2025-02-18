@@ -8,7 +8,6 @@ import { arrayMove } from '@dnd-kit/sortable';
 import ArrowRight from '../public/icons/icon(Arrow-Right).svg';
 import { useAppDispatch, useAppSelector } from './app/hooks';
 import { setIssues } from './app/IssuesSlice';
-import { useEffect } from 'react';
 
 export const App = () => {
   const dispatch = useAppDispatch();
@@ -21,8 +20,6 @@ export const App = () => {
   const repoUrl = useAppSelector((store) => store.repo.repoUrl);
 
   const repoPath = repoUrl.replace('https://github.com/', '');
-  console.log(issues);
-  console.log('owner', owner);
 
   const handleDragOver = (event: DragEndEvent) => {
     const { active, over } = event;
