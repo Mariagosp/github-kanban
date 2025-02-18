@@ -23,11 +23,6 @@ export const IssuesSlice = createSlice({
       state.error = '';
       state.issues[repoPath] = issues;
     },
-    resetIssues: (state) => {
-      state.issues = {};
-      state.loading = false;
-      state.error = '';
-    },
   },
   extraReducers: (builder) => {
     builder.addCase(fetchIssues.pending, (state) => {
@@ -47,6 +42,6 @@ export const IssuesSlice = createSlice({
   },
 });
 
-export const { setIssues, resetIssues } = IssuesSlice.actions;
+export const { setIssues } = IssuesSlice.actions;
 export default IssuesSlice.reducer;
 

@@ -20,6 +20,7 @@ export const App = () => {
   const repoUrl = useAppSelector((store) => store.repo.repoUrl);
 
   const repoPath = repoUrl.replace('https://github.com/', '');
+  console.log(issues);
 
   const handleDragOver = (event: DragEndEvent) => {
     const { active, over } = event;
