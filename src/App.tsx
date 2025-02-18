@@ -21,6 +21,7 @@ export const App = () => {
 
   const repoPath = repoUrl.replace('https://github.com/', '');
   console.log(issues);
+  console.log('owner', owner);
 
   const handleDragOver = (event: DragEndEvent) => {
     const { active, over } = event;
@@ -115,7 +116,7 @@ export const App = () => {
             </div>
           </div>
         )}
-        {!errorIssues && !errorRepo && !isLoading && (
+        {!errorIssues && !errorRepo && !isLoading && owner.name && (
           <>
             <Row className="mb-5">
               <h5 className="d-flex align-items-center gap-2">
