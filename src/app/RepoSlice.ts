@@ -11,7 +11,14 @@ type InitialState = {
 
 const initialState: InitialState = {
   repoUrl: '',
-  owner: {},
+  owner: {
+    id: null,
+    name: '',
+    url: '',
+    urlRepo: '',
+    repoName: '',
+    stars: 0,
+  },
   error: '',
   loading: false,
 };
@@ -29,6 +36,9 @@ export const repoSlice = createSlice({
     setLoading: (state, action: PayloadAction<boolean>) => {
       state.loading = action.payload;
     },
+    // resetOwner: (state) => {
+    //   state.owner = null;
+    // }
   },
   extraReducers: (builder) => {
     builder.addCase(fetchRepoInfo.pending, (state) => {

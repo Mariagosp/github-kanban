@@ -8,6 +8,7 @@ import { arrayMove } from '@dnd-kit/sortable';
 import ArrowRight from '../public/icons/icon(Arrow-Right).svg';
 import { useAppDispatch, useAppSelector } from './app/hooks';
 import { setIssues } from './app/IssuesSlice';
+import { useEffect } from 'react';
 
 export const App = () => {
   const dispatch = useAppDispatch();
@@ -91,7 +92,7 @@ export const App = () => {
         <Row className="mb-3">
           <FormELement />
         </Row>
-        {errorRepo && errorIssues && (
+        {errorRepo || errorIssues && (
           <Row>
             <Col>
               <div
