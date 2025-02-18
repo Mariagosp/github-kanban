@@ -1,17 +1,17 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Owner } from '../types/Owner';
-import { fetchOwner } from './thunks';
+import { RepoInfo } from '../types/Owner';
+import { fetchRepoInfo } from './thunks';
 
 type InitialState = {
   repoUrl: string;
-  owner: Owner;
+  owner: RepoInfo;
   error: string;
   loading: boolean;
 };
 
 const initialState: InitialState = {
   repoUrl: '',
-  owner: {} as Owner,
+  owner: {},
   error: '',
   loading: false,
 };
@@ -29,28 +29,26 @@ export const repoSlice = createSlice({
     setLoading: (state, action: PayloadAction<boolean>) => {
       state.loading = action.payload;
     },
-    resetRepo: (state) => {
-      // state.owner = {} as Owner;
-      state.repoUrl = '';
-    }
   },
   extraReducers: (builder) => {
-    builder.addCase(fetchOwner.pending, (state) => {
+    builder.addCase(fetchRepoInfo.pending, (state) => {
       state.loading = true;
+      state.error = '';
     });
     builder.addCase(
-      fetchOwner.fulfilled,
-      (state, action: PayloadAction<Owner>) => {
+      fetchRepoInfo.fulfilled,
+      (state, action: PayloadAction<RepoInfo>) => {
+        state.error = '';
         state.loading = false;
         state.owner = action.payload;
       },
     );
-    builder.addCase(fetchOwner.rejected, (state, action) => {
+    builder.addCase(fetchRepoInfo.rejected, (state, action) => {
       state.loading = false;
-      state.error = (action.payload as string) || 'Unknown error';
+      state.error = action.payload as string;
     });
   },
 });
 
-export const { setRepoUrl, setError, setLoading, resetRepo } = repoSlice.actions;
+export const { setRepoUrl, setError, setLoading } = repoSlice.actions;
 export default repoSlice.reducer;

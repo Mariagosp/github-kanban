@@ -1,5 +1,4 @@
-import { Container } from 'react-bootstrap';
-import './App.css';
+import { Col, Container } from 'react-bootstrap';
 import { FormELement } from './components/Form/Form';
 import { IssueType } from './types/IssueType';
 import { Row } from 'react-bootstrap';
@@ -11,49 +10,16 @@ import { useAppDispatch, useAppSelector } from './app/hooks';
 import { setIssues } from './app/IssuesSlice';
 
 export const App = () => {
-  const owner = useAppSelector((store) => store.repo.owner);
-  const issues = useAppSelector((store) => store.issues.issues);
-  const isLoading = useAppSelector((store) => store.repo.loading)
   const dispatch = useAppDispatch();
 
-  // const fetchGitHubData = (repoPath: string) => {
-  // setIsLoading(true);
-  // setError('');
+  const owner = useAppSelector((store) => store.repo.owner);
+  const issues = useAppSelector((store) => store.issues.issues);
+  const isLoading = useAppSelector((store) => store.repo.loading);
+  const errorRepo = useAppSelector((store) => store.repo.error);
+  const errorIssues = useAppSelector((store) => store.issues.error);
+  const repoUrl = useAppSelector((store) => store.repo.repoUrl);
 
-  // dispatch(fetchOwner(repoPath));
-  // dispatch(fetchIssues(repoPath));
-
-  // getOwner(repoPath)
-  //   .then((data) => {
-  //     dispatch(
-  //       setOwner({
-  //         name: data.owner.login,
-  //         url: data.owner.html_url,
-  //         urlRepo: data.html_url,
-  //         repoName: data.name,
-  //         stars: data.stargazers_count,
-  //       }),
-  //     );
-  //   })
-  //   .catch(() => dispatch(setRepoError('Something went wrong')));
-
-  // getIssues(repoPath)
-  //   .then((issues) => {
-  //     console.log('issues', issues);
-  //     const formattedIssues = issues.map((issue) => ({
-  //       id: issue.id,
-  //       title: issue.title,
-  //       author: issue.user.login,
-  //       authorUrl: issue.user.html_url,
-  //       comments: issue.comments,
-  //       status: issue.state === 'open' ? 'ToDo' : 'Done',
-  //     }));
-  //     console.log('formattedIssues', formattedIssues);
-  //     dispatch(setIssues(formattedIssues));
-  //   })
-  //   .catch(() => setError('Something went wrong'))
-  //   .finally(() => setIsLoading(false));
-  // };
+  const repoPath = repoUrl.replace('https://github.com/', '');
 
   const handleDragOver = (event: DragEndEvent) => {
     const { active, over } = event;
@@ -70,116 +36,115 @@ export const App = () => {
     if (!isActiveATask) return;
 
     if (isActiveATask && isOverATask) {
+      if (!issues[repoPath]) return [];
+
+      const activeIndex = issues[repoPath]?.findIndex(
+        (issue) => issue.id === activeId,
+      );
+      const overIndex = issues[repoPath]?.findIndex(
+        (issue) => issue.id === overId,
+      );
+
+      const updatedIssues = issues[repoPath].map((issue, index) =>
+        index === activeIndex ?
+          { ...issue, status: issues[repoPath][overIndex].status }
+        : issue,
+      );
+
       dispatch(
-        setIssues((prev: IssueType[]) => {
-          if (!prev) return [];
-          const activeIndex = prev?.findIndex(
-            (issue) => issue.id === activeId,
-          );
-          const overIndex = prev?.findIndex((issue) => issue.id === overId);
-
-          prev[activeIndex].status = prev[overIndex].status;
-
-          return arrayMove(prev, activeIndex, overIndex);
-        })
-        // setIssues({
-        //   repoUrl: repoUrl,
-        //   issues: (prev: IssueType[]) => {
-        //     if (!prev) return [];
-        //     const activeIndex = prev?.findIndex(
-        //       (issue) => issue.id === activeId,
-        //     );
-        //     const overIndex = prev?.findIndex((issue) => issue.id === overId);
-
-        //     prev[activeIndex].status = prev[overIndex].status;
-
-        //     return arrayMove(prev, activeIndex, overIndex);
-        //   },
-        // }),
+        setIssues({
+          repoPath,
+          issues: arrayMove(updatedIssues, activeIndex, overIndex),
+        }),
       );
     }
 
     const isOverAColumn = over.data.current?.type === 'Column';
 
     if (isActiveATask && isOverAColumn) {
-      dispatch(
-        setIssues((prev: IssueType[]) => {
-          if (!prev) return [];
-          const activeIndex = prev.findIndex(
-            (issue) => issue.id === activeId,
-          );
-          prev[activeIndex].status = overId as IssueType['status'];
+      if (!issues) return [];
 
-          return arrayMove(prev, activeIndex, activeIndex);
-        })
+      const activeIndex = issues[repoPath].findIndex(
+        (issue) => issue.id === activeId,
+      );
+
+      const updatedIssues = issues[repoPath].map((issue, index) =>
+        index === activeIndex ?
+          { ...issue, status: overId as IssueType['status'] }
+        : issue,
+      );
+
+      dispatch(
+        setIssues({
+          repoPath,
+          issues: arrayMove(updatedIssues, activeIndex, activeIndex),
+        }),
       );
     }
   };
-  console.log('issues!!!!!', issues);
 
   return (
     <>
       <Container className="mt-4">
         <Row className="mb-3">
-          <FormELement
-          // setRepoUrl={setRepoUrl}
-          // fetchGitHubData={fetchGitHubData}
-          />
+          <FormELement />
         </Row>
-        {isLoading ?
-          <p>Loading...</p>
-        : <>
-            {issues.length !== 0 && (
-            <>
-              <Row className="mb-5">
-                <h5 className="d-flex align-items-center gap-2">
-                  <a href={`${owner?.url}`}>{owner?.name}</a>
-                    <img src={ArrowRight} alt="Arrow Right" />
-                  <a href={`${owner?.urlRepo}`}>{owner?.repoName}</a>
-                </h5>
-                <p>⭐ {owner?.stars} stars</p>
-              </Row>
-              <DndContext
-                // onDragEnd={handleDragEnd}
-                onDragOver={handleDragOver}
+        {errorRepo && errorIssues && (
+          <Row>
+            <Col>
+              <div
+                className="alert alert-danger"
+                role="alert"
               >
-                <ColumnsList />
-              </DndContext>
-            </>
-            )} 
+                Oops! It seems like something went wrong.. Try again!!!
+              </div>
+            </Col>
+          </Row>
+        )}
+        {isLoading && (
+          <div
+            className="d-flex justify-content-center align-items-center"
+            style={{ minHeight: '100vh' }}
+          >
+            <div
+              className="spinner-border"
+              role="status"
+            >
+              <span className="sr-only"></span>
+            </div>
+          </div>
+        )}
+        {!errorIssues && !errorRepo && !isLoading && (
+          <>
+            <Row className="mb-5">
+              <h5 className="d-flex align-items-center gap-2">
+                <a
+                  href={`${owner?.url}`}
+                  target="_blank"
+                >
+                  {owner?.name}
+                </a>
+                <img
+                  src={ArrowRight}
+                  alt="Arrow Right"
+                />
+                <a
+                  href={`${owner?.urlRepo}`}
+                  target="_blank"
+                >
+                  {owner?.repoName}
+                </a>
+              </h5>
+              <p>⭐ {owner?.stars} stars</p>
+            </Row>
+            <DndContext
+              onDragOver={handleDragOver}
+            >
+              <ColumnsList />
+            </DndContext>
           </>
-        }
+        )}
       </Container>
     </>
   );
 };
-
-{
-  /* <Row>
-          {['ToDo', 'In Progress', 'Done'].map((status) => (
-            <Column
-              key={status}
-              title={status}
-              issues={issues.filter((issue) => issue.status === status)}
-            />
-          ))}
-        </Row> */
-}
-
-// useEffect(() => {
-//   if (!repoUrl) return;
-//   setIsLoading(true);
-//   setError('');
-//   const repoPath = repoUrl.replace('https://github.com/', '');
-//   console.log('Repository path:', repoPath);
-//   getOwner(repoPath)
-//     .then((owner) => {
-//     // console.log('owner', owner);
-//     setOwner({
-//       name: owner.login,
-//       url: owner.html_url,
-//     });
-//     })
-//     .catch(() => setError('something went wrong'))
-//     .finally(() => setIsLoading(false))
-// }, [repoUrl]);

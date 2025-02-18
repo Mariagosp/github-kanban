@@ -5,18 +5,19 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { useAppDispatch, useAppSelector } from '../../app/hooks';
-import { resetRepo, setRepoUrl } from '../../app/RepoSlice';
-import { resetIssues } from '../../app/IssuesSlice';
-import { fetchIssues, fetchOwner } from '../../app/thunks';
+import { setRepoUrl } from '../../app/RepoSlice';
+import { setIssues } from '../../app/IssuesSlice';
+import { fetchIssues, fetchRepoInfo } from '../../app/thunks';
 
 type RepoUrl = {
   repoUrl: string;
 };
 
-
 export const FormELement = () => {
   const dispatch = useAppDispatch();
+
   const repoUrl = useAppSelector((store) => store.repo.repoUrl);
+  const issues = useAppSelector((store) => store.issues.issues);
 
   const schema = yup.object().shape({
     repoUrl: yup
@@ -29,7 +30,6 @@ export const FormELement = () => {
     register,
     handleSubmit,
     formState: { errors },
-    reset,
   } = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
@@ -38,16 +38,24 @@ export const FormELement = () => {
   });
 
   const onSubmit = (data: RepoUrl) => {
-    dispatch(setRepoUrl(data.repoUrl));
-    const repoPath = data.repoUrl.replace('https://github.com/', '');
-    dispatch(fetchOwner(repoPath));
-    dispatch(fetchIssues(repoPath));
-  };
+    dispatch(setRepoUrl(data.repoUrl.trim()));
 
-  const handleReset = () => {
-    reset();
-    dispatch(resetRepo());
-    dispatch(resetIssues());
+    const repoPath = data.repoUrl.replace('https://github.com/', '');
+
+    if (issues[repoPath]) {
+      const repoIssues = issues[repoPath];
+
+      dispatch(fetchRepoInfo(repoPath));
+      dispatch(
+        setIssues({
+          repoPath: repoPath,
+          issues: repoIssues,
+        }),
+      );
+    } else {
+      dispatch(fetchRepoInfo(repoPath));
+      dispatch(fetchIssues(repoPath));
+    }
   };
 
   return (
@@ -71,21 +79,9 @@ export const FormELement = () => {
             >
               Load Issues
             </Button>
-            <Button
-              variant="secondary"
-              type="button"
-              onClick={handleReset}
-              className="w-auto text-nowrap"
-            >
-              Clear
-            </Button>
           </Form.Group>
           {errors.repoUrl && (
-            <div
-              className="text-danger"
-            >
-              {errors.repoUrl.message}
-            </div>
+            <div className="text-danger">{errors.repoUrl.message}</div>
           )}
         </Form>
       </Col>

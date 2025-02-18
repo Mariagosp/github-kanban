@@ -1,31 +1,35 @@
 import { Row } from 'react-bootstrap';
 import { Column } from '../Column/Column';
 import { useAppSelector } from '../../app/hooks';
-
-export type Column = {
-  title: 'ToDo' | 'In Progress' | 'Done';
-  color: string;
-}
-
-const columns: Column[] = [
-  { title: "ToDo", color: "#f8d7da" },
-  { title: "In Progress", color: "#fff3cd" },
-  { title: "Done", color: "#d4edda" },
-];
-
+import { columns } from '../../utils/constants';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 export const ColumnsList = () => {
-  const issues = useAppSelector(store => store.issues.issues);
+  const issues = useAppSelector((store) => store.issues.issues);
+  const repoUrl = useAppSelector((store) => store.repo.repoUrl);
+
+  const repoPath = repoUrl.replace('https://github.com/', '');
+  const repoIssues = issues[repoPath] || [];
+
   return (
-    <Row className='d-flex flex-row gap-2 mb-5'>
-      {columns.map((column) => (
-        <Column
-          key={column.color}
-          title={column.title}
-          issues={issues.filter((issue) => issue.status === column.title)}
-          bgColor={column.color}
-        />
-      ))}
-    </Row>
+    <>
+      {repoIssues.length === 0 ?
+        <div className="alert alert-primary" role="alert">
+        Oops! It seems that this repository is issue-free yet!
+      </div>
+      : <Row className="d-flex flex-row gap-2 mb-5">
+          {columns.map((column) => (
+            <Column
+              key={column.color}
+              title={column.title}
+              issues={repoIssues.filter(
+                (issue) => issue.status === column.title,
+              )}
+              bgColor={column.color}
+            />
+          ))}
+        </Row>
+      }
+    </>
   );
 };

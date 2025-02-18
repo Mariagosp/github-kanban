@@ -1,9 +1,6 @@
 import { combineReducers, configureStore } from '@reduxjs/toolkit';
-
 import issuesReducer from './IssuesSlice';
 import repoReducer from './RepoSlice';
-
-
 import {
   persistStore,
   persistReducer,
@@ -37,10 +34,6 @@ export const store = configureStore({
       },
     }),
 });
-
-// export const store = configureStore({
-//   reducer: rootReducer,
-// });
 
 export const persistor = persistStore(store);
 
